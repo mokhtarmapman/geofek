@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مراجعة في مادة الفكر الجغرافي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Amiri:wght@700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #2980b9;
+            --accent: #f1c40f;
+            --success: #27ae60;
+            --error: #c0392b;
+            --bg: #ecf0f1;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--primary);
+            padding: 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 { margin: 0; font-size: 1.6rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .header p { margin: 8px 0 0; font-size: 0.95rem; opacity: 0.9; }
+
+        .timer-container {
+            height: 6px;
+            background: #eee;
+            width: 100%;
+            position: relative;
+        }
+        .timer-bar {
+            height: 100%;
+            background: var(--error);
+            width: 100%;
+            transform-origin: left;
+            transition: width 1s linear;
+        }
+
+        .content-body { padding: 30px; }
+
+        .question-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .timer-badge {
+            background: #ffebee;
+            color: var(--error);
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .options-grid { display: grid; gap: 12px; }
+
+        .option-btn {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: right;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: var(--secondary);
+            background: #f4faff;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.correct { background: #d4edda; border-color: var(--success); color: #155724; }
+        .option-btn.wrong { background: #f8d7da; border-color: var(--error); color: #721c24; }
+        .option-btn[disabled] { cursor: default; opacity: 0.9; }
+
+        .result-screen, .certificate-wrapper, .feedback-screen { display: none; text-align: center; padding: 20px; }
+        
+        .score-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px dashed #ccc;
+        }
+        
+        .score-huge { font-size: 3rem; font-weight: 800; color: var(--secondary); display: block; }
+        
+        .input-group { margin: 25px 0; }
+        input[type="text"] {
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            width: 70%;
+            text-align: center;
+            font-family: 'Cairo';
+            outline: none;
+        }
+        input[type="text"]:focus { border-color: var(--secondary); }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: 'Cairo';
+            font-weight: 700;
+            transition: transform 0.2s;
+            margin: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background: var(--secondary); color: white; }
+        .btn-gold { background: linear-gradient(to right, #f1c40f, #f39c12); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); }
+
+        .certificate-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border: 10px solid var(--primary);
+            padding: 40px;
+            background: white;
+            color: #333;
+            text-align: center;
+            position: relative;
+            box-sizing: border-box;
+            background-image: radial-gradient(#f0f0f0 10%, transparent 10%);
+            background-size: 20px 20px;
+        }
+        
+        .cert-inner-border {
+            border: 3px double var(--accent);
+            padding: 30px;
+            position: relative;
+            z-index: 1;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .cert-header { font-family: 'Amiri', serif; font-size: 3.5rem; color: var(--primary); margin-bottom: 20px; }
+        .cert-body { font-size: 1.4rem; margin: 30px 0; line-height: 1.8; }
+        .cert-name-highlight { 
+            font-family: 'Amiri', serif;
+            font-size: 2.5rem;
+            color: var(--secondary);
+            border-bottom: 2px solid var(--accent);
+            padding: 0 30px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .feedback-item {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: right;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+        .feedback-item.correct-item { border-right: 6px solid var(--success); }
+        .feedback-item.wrong-item { border-right: 6px solid var(--error); }
+        .fb-q { font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; color: var(--primary); }
+        .fb-ans { margin: 5px 0; font-size: 0.98rem; }
+        .fb-exp { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.9rem; color: #555; }
+        .badge-status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .badge-correct { background: #d4edda; color: #155724; }
+        .badge-wrong { background: #f8d7da; color: #721c24; }
+
+        @media print {
+            body { background: white; display: block; height: auto; overflow: visible; }
+            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; overflow: visible; }
+            .header, .timer-container, .no-print, .btn { display: none !important; }
+            .certificate-wrapper { display: block !important; }
+            .certificate-container { border: 5px solid var(--primary); page-break-inside: avoid; margin: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="main-container">
+    <div class="header">
+        <h1>مراجعة في مادة الفكر الجغرافي 📜🌍</h1>
+        <p>إشراف: د. مختار الحسانين</p>
+    </div>
+
+    <div class="timer-container">
+        <div class="timer-bar" id="timer-bar"></div>
+    </div>
+
+    <div class="content-body">
+        
+        <div id="quiz-screen">
+            <div class="question-meta">
+                <span id="q-number">سؤال 1</span>
+                <div class="timer-badge">⏱️ متبقي: <span id="timer-text">30</span> ثانية</div>
+            </div>
+            
+            <div class="question-text" id="question">جاري التحميل...</div>
+            <div class="options-grid" id="options"></div>
+        </div>
+
+        <div id="result-screen" class="result-screen">
+            <h2>انتهى الاختبار!</h2>
+            <div class="score-box">
+                <span>نتيجتك النهائية</span>
+                <span class="score-huge" id="final-score">0%</span>
+                <p id="final-msg" style="color: #7f8c8d;"></p>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="student-name" placeholder="اكتب اسمك الثلاثي لإصدار الشهادة">
+            </div>
+
+            <button class="btn btn-info" onclick="showFeedback()">📝 التغذية الراجعة والمراجعة</button>
+            <button class="btn btn-gold" onclick="generateCertificate()">🏆 عرض الشهادة</button>
+            <button class="btn btn-primary" onclick="location.reload()">🔄 إعادة المحاولة</button>
+        </div>
+
+        <div id="feedback-screen" class="feedback-screen">
+            <h2 style="margin-bottom: 25px;">التغذية الراجعة وتفسير الإجابات 🔍</h2>
+            <div id="feedback-container"></div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-gold" onclick="generateCertificate()">🏆 عرض الشهادة</button>
+                <button class="btn btn-primary" onclick="location.reload()">🔄 إعادة المحاولة</button>
+            </div>
+        </div>
+
+        <div id="certificate-screen" class="certificate-wrapper">
+            <div class="certificate-container" id="cert-node">
+                <div class="cert-inner-border">
+                    <div class="cert-header">شهادة تميز</div>
+                    <div class="cert-body">
+                        يسرنا أن نشهد بأن الطالب/ة<br>
+                        <span class="cert-name-highlight" id="cert-name">...</span><br>
+                        قد اجتاز مراجعة مادة <b>الفكر الجغرافي</b><br>
+                        بتقدير <span id="cert-grade" style="color:var(--success); font-weight:bold;">...</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 50px; font-family: 'Amiri';">
+                        <div style="text-align: right;">
+                            <p>التاريخ: <span id="cert-date"></span></p>
+                        </div>
+                        <div style="text-align: left;">
+                            <p>د. مختار الحسانين</p>
+                            <p style="font-size: 0.8em; color: #777;">قسم الجغرافيا - جامعة المنصورة</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="no-print" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                <button class="btn btn-success" onclick="downloadImage()">💾 تحميل الشهادة كصورة (PNG)</button>
+                <button class="btn btn-primary" onclick="window.print()">🖨️ طباعة (PDF)</button>
+                <button class="btn btn-outline" onclick="location.reload()">🏠 خروج</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            q: "من هو العالم الإغريقي الذي صاغ مصطلح 'جغرافيا' (Geographia) لأول مرة وقام بحساب محيط الأرض؟",
+            options: ["جيرلند", "بطليموس", "إراتوستينس", "دبنهام"],
+            answer: 2,
+            explanation: "إراتوستينس هو عالم الفلك والرياضيات الإغريقي الذي عاش في الإسكندرية وكان أول من صاغ هذا المصطلح وحسب محيط الأرض بدقة معتمدة في زمانه."
+        },
+        {
+            q: "ما المعنى الحرفي المباشر للكلمة اليونانية الأصلية 'Geographia'؟",
+            options: ["وصف الأرض", "دراسة المناخ", "خريطة العالم", "تفاعل البيئة"],
+            answer: 0,
+            explanation: "يتكون المصطلح من مقطعين هما 'جيو' وتطلق على الأرض، و'جرافيا' وتعني الرسم أو الكتابة والوصف."
+        },
+        {
+            q: "متى تحولت الجغرافيا من علم وصفي كلاسيكي إلى علم حديث يعتمد على التحليل والتعليل والتفسير؟",
+            options: [
+                "مع ظهور التقنيات الفضائية في منتصف القرن العشرين",
+                "عند ترجمة كتب بطليموس في العصر العباسي",
+                "خلال العصر الإغريقي في القرن الرابع قبل الميلاد",
+                "عقب حركة الكشوف الجغرافية في القرن الخامس عشر"
+            ],
+            answer: 3,
+            explanation: "أدت الاكتشافات الكبرى ككشف أمريكا عام 1492م إلى وضع الجغرافيا على أسس علمية حديثة تقوم على التحليل والتفسير وتجاوز الوصف السطحي."
+        },
+        {
+            q: "وفقاً لتصنيف الفيلسوف أوجست كونت للعلوم وتبويبها، يُصنف علم الجغرافيا بأنه:",
+            options: ["علم تاريخي بحت يعتمد على الزمن فقط", "علم معقد مركب", "علم مستقل بذاته لا يتقاطع مع غيره", "علم بسيط مجرد"],
+            answer: 1,
+            explanation: "يتطلب علم الجغرافيا قبل البدء في دراسته الإلمام بنواح شتى من علوم متعددة تدرس البيئة والإنسان لتشكيل الصورة المكانية المركبة."
+        },
+        {
+            q: "ما الهدف من وضع الموضوعات الخمسة للجغرافيا (MR.HELP) عام 1984م؟",
+            options: [
+                "تصنيف الدول حسب فائضها الديموغرافي",
+                "استبدال الخرائط التقليدية بنظم المعلومات الجغرافية",
+                "التركيز الحصري على الجغرافيا الطبيعية وإلغاء الجغرافيا البشرية",
+                "تسهيل تدريس المعرفة الجغرافية وتنظيمها في المؤسسات التعليمية"
+            ],
+            answer: 3,
+            explanation: "وضعت رابطة الجغرافيين الأمريكيين والمجلس الوطني لتدريس الجغرافيا هذه الأفكار الخمس لتبسيط وتسهيل عرض الجغرافيا في المدارس والجامعات."
+        },
+        {
+            q: "يعبر تحديد موقع ظاهرة جغرافية معينة باستخدام تقاطع خطوط الطول ودوائر العرض عن:",
+            options: ["الموقع النسبي أو الجغرافي", "الموقع المطلق أو الفلكي", "الموضع", "الإقليم"],
+            answer: 1,
+            explanation: "يعتمد الموقع المطلق على شبكة الإحداثيات الوهمية الدقيقة التي تحدد موقع النقطة على الكرة الأرضية."
+        },
+        {
+            q: "يُطلق على المنهج الجغرافي الذي يدرس ظاهرة جغرافية واحدة كالزراعة أو المناخ على مستوى العالم ككل اسم:",
+            options: ["المنهج الأصولي (الجغرافيا العامة)", "الجغرافيا التاريخية", "المسح الميداني", "المنهج الإقليمي (الجغرافيا الخاصة)"],
+            answer: 0,
+            explanation: "يتناول المنهج الأصولي موضوعاً أو ظاهرة جغرافية واحدة ويحلل توزيعها وقوانينها العامة عبر العالم."
+        },
+        {
+            q: "ترتبط نشأة الفكر الجغرافي والاهتمام بالمكان لدى الإنسان الأول بغريزتين أساسيتين هما:",
+            options: ["حب التجارة والتبادل المالي", "حب الاستطلاع وحب البقاء", "حب التملك والتوسع العسكري", "حب الرسم والتجميع الإحصائي"],
+            answer: 1,
+            explanation: "ولدت غريزة حب الاستطلاع ملكة الملاحظة لدى الإنسان، بينما دفعت غريزة حب البقاء البحث عن البيئة المناسبة لتوفير المأكل والمأوى والتعمير."
+        },
+        {
+            q: "توصف الجغرافيا بأنها 'علم ثنائي أو مزدوج الشخصية' بسبب:",
+            options: [
+                "تنازعها بين التاريخ والفلسفة",
+                "دراستها للبيئة والإنسان واعتمادها على المنهجين الأصولي والإقليمي",
+                "اعتمادها على الخرائط القديمة والخرائط الحديثة فقط",
+                "صعوبة التمييز بين تعريف إراتوستينس وتعريف بطليموس"
+            ],
+            answer: 1,
+            explanation: "تتمثل الثنائية في وجود جناحين للعلم: طبيعي يدرس البيئة، وبشري يدرس الإنسان، إضافة لاستخدام المنهجين العام (الأصولي) والخاص (الإقليمي)."
+        },
+        {
+            q: "ما المساهمة العلمية البارزة للعالم الإغريقي بطليموس في تطوير المعرفة الجغرافية؟",
+            options: [
+                "وضع المحاور الخمسة الحديثة لتدريس علم الجغرافيا",
+                "تأليف كتاب 'المدخل في الجغرافيا' الذي اعتمد عليه الجغرافيون القدامى والعرب",
+                "ابتكار أول نظام كمي لتحليل البيانات الجغرافية باستخدام الحاسب الآلي",
+                "دمج الجغرافيا مع العلوم الطبيعية وإلغاء الجانب البشري منها"
+            ],
+            answer: 1,
+            explanation: "مثل كتاب بطليموس المرجع الأساسي المعرفي للجغرافيا القديمة واعتمد عليه العرب وترجموه في عصر النهضة العلمية."
+        },
+        {
+            q: "ما الفارق الجوهري بين أسلوب الجغرافيا القديمة وأسلوب الجغرافيا الحديثة؟",
+            options: [
+                "اهتمت القديمة بدراسة التفاعلات البشرية بينما ركزت الحديثة حصرياً على الظاهرات الطبيعية",
+                "اعتمدت القديمة على الخرائط الرقمية بينما ألغت الحديثة استخدام الخرائط تماماً",
+                "اقتصرت القديمة على الوصف الظاهري بينما اعتمدت الحديثة على التحليل والتعليل والربط المكاني",
+                "ركزت القديمة على التفسير العلمي بينما كانت الحديثة مجرد وصف خيالي للظاهرات"
+            ],
+            answer: 2,
+            explanation: "الجغرافيا القديمة كانت تجيب عن سؤال 'ماذا؟' بالوصف، بينما الحديثة تجيب عن سؤال 'لماذا؟' بالتحليل والتفسير والتوزيع."
+        },
+        {
+            q: "ما السبب الرئيسي لنقل عاصمة نيجيريا من لاجوس إلى أبوجا عام 1991م من منظور جغرافي تحليلي؟",
+            options: [
+                "وقوع أبوجا على شبه جزيرة منخفضة يسهل حمايتها عسكرياً مقارنة بلاجوس",
+                "سيطرة أكبر مجموعة عرقية في نيجيريا على مدينة أبوجا لضمان الاستقرار السيادي",
+                "تحقيق الحياد العرقي والديني في موقع متوسط وتوفير مساحة للتوسع العمراني بمناخ أفضل",
+                "تركز أسطول النقل البحري الرئيسي لدولة نيجيريا في مدينة أبوجا"
+            ],
+            answer: 2,
+            explanation: "أبوجا اختيرت لموقعها المركزي، ومناخ المرتفعات الجيد، ومساحة التوسع، وتجنب الصراعات العرقية والدينية المتكررة في لاجوس."
+        },
+        {
+            q: "كيف عرف العالم كارل ريتر (Carl Ritter) علم الجغرافيا؟",
+            options: [
+                "دراسة العلاقة بين كافة الظاهرات الطبيعية والجنس البشري",
+                "فلسفة المكان الشاملة",
+                "علم دراسة كوكب الأرض كأحد كواكب المجموعة الشمسية",
+                "دراسة أينية الأشياء ومواقعها الدقيقة"
+            ],
+            answer: 0,
+            explanation: "كارل ريتر ركز في تعريفه للجغرافيا على أنها دراسة العلاقة القائمة بين الظاهرات الطبيعية والجنس البشري."
+        },
+        {
+            q: "ما المفهوم الجغرافي الذي طرحه العالم هارتشورن (Hartshorne) عام 1939م لتعريف الجغرافيا؟",
+            options: [
+                "وصف طبقات القشرة الأرضية وباطنها",
+                "علم دراسة الاختلافات المكانية",
+                "علم التنبؤ البشري والنيات المستقبلية",
+                "علم التوزيعات الجغرافية الصماء"
+            ],
+            answer: 1,
+            explanation: "تعريف هارتشورن المرجعي ينص على أن الجغرافيا هي دراسة الاختلافات أو التباينات المكانية على سطح الأرض."
+        },
+        {
+            q: "ما الهدف الأساسي للعالم جيرلند (Gerland) من تعريف الجغرافيا بأنها 'علم كوكب الأرض'؟",
+            options: [
+                "حصر الدراسات الجغرافية في رسم الخرائط الكنتورية الميدانية فقط",
+                "التركيز حصرياً على الأنشطة البشرية الاقتصادية وتجاهل العوامل الفلكية",
+                "إثبات أن الجغرافيا علم اجتماعي خالص لا يتصل بالعلوم الطبيعية",
+                "إدخال الجغرافيا ضمن العلوم الطبيعية لإنقاذها من الإغراق في الجوانب الوصفية"
+            ],
+            answer: 3,
+            explanation: "هدف جيرلند كان تأكيد علمية الجغرافيا بربطها بالعلوم الطبيعية لإنقاذها من الطابع الوصفي الذي ساد لفترات طويلة."
+        },
+        {
+            q: "ما الأداة الجغرافية التي ظلت مستمرة ومرافقة لعلم الجغرافيا في كافة مراحله التاريخية القديمة والحديثة؟",
+            options: ["المقابلات والاستبيانات الإحصائية الميدانية", "برمجيات نظم المعلومات الجغرافية (GIS)", "الصور الفضائية المأخوذة بالأقمار الصناعية", "الخرائط"],
+            answer: 3,
+            explanation: "الخرائط وسيلة تعبير جغرافية تاريخية بدأت مع رسوم إنسان ما قبل التاريخ على الكهوف واستمرت أداة رئيسية في الجغرافيا الحديثة."
+        },
+        {
+            q: "ما الشرط الأساسي الذي يجعل من الجغرافيا فرعاً مستقلاً وعلماً قائماً بذاته حسب مفهوم 'ميدان علم الجغرافيا'؟",
+            options: [
+                "تغير الظاهرات الجغرافية وتباينها من مكان إلى آخر على سطح الأرض",
+                "ثبات الظاهرات الطبيعية وعدم تغيرها مكانياً أو زمانياً",
+                "الاعتماد المباشر والوحيد على المعادلات الرياضية النظرية",
+                "الاقتصار على دراسة التتابع الزمني للأحداث السياسية"
+            ],
+            answer: 0,
+            explanation: "ميدان الجغرافيا هو سطح الأرض، وتغير الظاهرات وتباينها مكانيًا هو المحرك الأساسي الذي يعطي الجغرافيا شخصيتها العلمية المستقلة."
+        },
+        {
+            q: "ماذا يقصد بالطبيعة الثنائية أو ازدواجية الشخصية في علم الجغرافيا؟",
+            options: [
+                "كتابة الأبحاث والمؤلفات الجغرافية بلغتين مختلفين في الوقت نفسه",
+                "تقسيم العلم إلى قسم خيالي استكشافي وقسم واقعي تطبيقي",
+                "دراسة كوكب الأرض والقمر معاً في إطار علمي واحد",
+                "جمعها بين الجانب الطبيعي والجانب البشري، واعتمادها المنهجين الأصولي والإقليمي"
+            ],
+            answer: 3,
+            explanation: "تتكون ازدواجية الجغرافيا من جناح موضوعي (بيئة طبيعية وإنسان بشري) وجناح منهجي (منهج أصولي عام ومنهج إقليمي خاص)."
+        },
+        {
+            q: "كيف يدرس 'المنهج الأصولي' (الجغرافيا العامة أو النظامية) الظاهرات الجغرافية؟",
+            options: [
+                "يدرس ظاهرة جغرافية واحدة ومحددة على مستوى العالم ككل",
+                "يتناول منطقة محددة بكافة ظاهراتها الطبيعية والبشرية بشكل مفصل",
+                "يقتصر على رسم الخرائط دون تقديم أي تفسيرات أو تعليلات مكانية",
+                "يركز حصرياً على سرد السلاسل الزمنية التاريخية لنشأة القارات"
+            ],
+            answer: 0,
+            explanation: "المنهج الأصولي الشامل يختار موضوعاً أو ظاهرة نظامية واحدة (مثل المناخ أو الزراعة) ويدرس توزيعها عبر العالم."
+        },
+        {
+            q: "ما المفهوم الذي يعبر عن علم الجغرافيا كـ 'علم بيني'؟",
+            options: [
+                "ينتمي حصرياً إلى مجموعة علوم الأحياء والطب فقط",
+                "يفصل تماماً بين البيئة الطبيعية والإنسان ويرفض التفاعل بينهما",
+                "يمثل جسراً يربط بين العلوم الطبيعية والعلوم البشرية ويستوعب نتائجها في إطار مكاني",
+                "يقتصر على رصد التوزيعات الإحصائية دون تقديم أسباب للمظاهر"
+            ],
+            answer: 2,
+            explanation: "العلم البيني هو الذي يضع قدماً في العلوم الطبيعية وأخرى في العلوم البشرية ويقدم تفسيرات مكانية متكاملة مستندة لنتائج العلوم الأخرى."
+        },
+        {
+            q: "ماذا يمثل المحور الأول (Location - الموقع) ضمن المحاور الخمسة للجغرافيا (MR.HELP)؟",
+            options: [
+                "وصف السمات الفيزيائية والبشرية الفريدة لمكان ما",
+                "تقسيم سطح الأرض إلى أقاليم سياسية أو إدارية متجانسة",
+                "رصد أساليب نقل البضائع والأفكار عبر وسائل الاتصال الحديثة",
+                "نقطة البدء في الدراسة الجغرافية وينقسم إلى موقع مطلق (فلكي) وموقع نسبي (جغرافي)"
+            ],
+            answer: 3,
+            explanation: "يبدأ التحليل الجغرافي بذكر الموقع، وهو إما مطلق عبر نظام الإحداثيات أو نسبي بالنسبة للظاهرات المجاورة."
+        },
+        {
+            q: "كيف يتم تحديد 'الموقع المطلق أو الفلكي' (Absolute Location) لأي نقطة على سطح الأرض؟",
+            options: [
+                "بذكر أسماء الدول والبحار المجاورة للنقطة المختارة",
+                "بالاعتماد على درجات الحرارة السائدة وكميات الأمطار السنوية",
+                "باستخدام شبكة خطوط الطول ودوائر العرض والارتفاع عن سطح البحر",
+                "بتقدير مسافة السفر إليها بالسيارات أو الحافلات"
+            ],
+            answer: 2,
+            explanation: "الموقع المطلق يتحدد بدقة لا تتشارك فيها نقطتان باستخدام خطوط الطول (X) ودوائر العرض (Y)، والارتفاع (Z)."
+        },
+        {
+            q: "ما الذي يميز محور 'الموضع' (Place) عن محور 'الموقع' (Location) في المحاور الخمسة للجغرافيا؟",
+            options: [
+                "يمثل الموضع الوحدات المساحية الكبرى كالقارات والدول",
+                "يقتصر الموضع على ذكر خطوط الطول الإحداثية فقط",
+                "يدرس الموضع حركة البضائع والهجرات بين القارات",
+                "يركز الموضع على الخصائص الطبيعية والبشرية التي تميز المكان وتمنحه هويته"
+            ],
+            answer: 3,
+            explanation: "الموضع (Place) يصف السمات الطبيعية والبشرية التي تجعل المكان فريداً داخل حدوده، بينما الموقع (Location) يحدد أين يقع."
+        },
+        {
+            q: "ما الفكرة الأساسية التي يغطيها محور 'تفاعل الإنسان والبيئة' (Human-Environment Interaction)؟",
+            options: [
+                "حساب خطوط الطول ودوائر العرض لمنطقة معينة",
+                "قياس محيط الكرة الأرضية باستخدام الظلال الشمسية",
+                "تحديد مواقع العواصم والحدود السياسية المجاورة",
+                "دراسة التأثير المتبادل بين الأنشطة البشرية والبيئة والتكيف معها أو تعديلها"
+            ],
+            answer: 3,
+            explanation: "يركز هذا المحور على كيفية اعتماد الإنسان على البيئة، وتكيفه مع ظروفها، وتعديله لمواردها لحفظ بقائه وتعمير الأرض."
+        },
+        {
+            q: "أي من المكونات التالية يتشكل منه المفهوم الشامل لـ 'الشخصية الإقليمية' لأي إقليم جغرافي؟",
+            options: [
+                "الشخصية الطبيعية، والشخصية البشرية، والشخصية الاقتصادية",
+                "الشخصية الفلكية، والشخصية البحرية، والشخصية الجيولوجية فقط",
+                "الشخصية التاريخية، والشخصية الرياضية، والشخصية الإحصائية فقط",
+                "الشخصية العسكرية، والشخصية اللغوية، والشخصية المناخية فقط"
+            ],
+            answer: 0,
+            explanation: "تتكون الشخصية الإقليمية لأي إقليم من ثلاثة جوانب متكاملة: الطبيعية، البشريّة، والاقتصادية."
+        }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+    let timer;
+    const TIME_PER_QUESTION = 45; 
+    let timeLeft = TIME_PER_QUESTION;
+    let userAnswers = [];
+
+    const qText = document.getElementById('question');
+    const optionsDiv = document.getElementById('options');
+    const qNumber = document.getElementById('q-number');
+    const timerText = document.getElementById('timer-text');
+    const timerBar = document.getElementById('timer-bar');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const feedbackScreen = document.getElementById('feedback-screen');
+    const certScreen = document.getElementById('certificate-screen');
+
+    function startQuiz() {
+        currentIdx = 0;
+        score = 0;
+        userAnswers = [];
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        clearInterval(timer);
+        timeLeft = TIME_PER_QUESTION;
+        updateTimerUI();
+        
+        const q = questions[currentIdx];
+        qText.textContent = q.q;
+        qNumber.textContent = `سؤال ${currentIdx + 1} من ${questions.length}`;
+        
+        optionsDiv.innerHTML = '';
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = opt;
+            btn.onclick = () => selectAnswer(i, btn);
+            optionsDiv.appendChild(btn);
+        });
+
+        startTimer();
+    }
+
+    function startTimer() {
+        timer = setInterval(() => {
+            timeLeft--;
+            updateTimerUI();
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                autoFail();
+            }
+        }, 1000);
+    }
+
+    function updateTimerUI() {
+        timerText.textContent = timeLeft;
+        const percent = (timeLeft / TIME_PER_QUESTION) * 100;
+        timerBar.style.width = `${percent}%`;
+        if(timeLeft < 10) timerBar.style.background = "#c0392b";
+        else timerBar.style.background = "#27ae60";
+    }
+
+    function selectAnswer(selectedIndex, btn) {
+        clearInterval(timer);
+        const correctIndex = questions[currentIdx].answer;
+        const allBtns = optionsDiv.getElementsByClassName('option-btn');
+        Array.from(allBtns).forEach(b => b.disabled = true);
+
+        userAnswers.push({
+            qIndex: currentIdx,
+            selected: selectedIndex,
+            correct: correctIndex,
+            isCorrect: selectedIndex === correctIndex
+        });
+
+        if (selectedIndex === correctIndex) {
+            btn.classList.add('correct');
+            score++;
+            confetti({ particleCount: 30, spread: 50, origin: { y: 0.7 } });
+        } else {
+            btn.classList.add('wrong');
+            allBtns[correctIndex].classList.add('correct');
+        }
+        setTimeout(nextQuestion, 1500);
+    }
+
+    function autoFail() {
+        const correctIndex = questions[currentIdx].answer;
+        const allBtns = optionsDiv.getElementsByClassName('option-btn');
+        Array.from(allBtns).forEach(b => b.disabled = true);
+
+        userAnswers.push({
+            qIndex: currentIdx,
+            selected: null,
+            correct: correctIndex,
+            isCorrect: false
+        });
+
+        allBtns[correctIndex].classList.add('correct');
+        setTimeout(nextQuestion, 2000);
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < questions.length) loadQuestion();
+        else finishQuiz();
+    }
+
+    function finishQuiz() {
+        quizScreen.style.display = 'none';
+        resultScreen.style.display = 'block';
+        document.querySelector('.timer-container').style.display = 'none';
+
+        const percentage = Math.round((score / questions.length) * 100);
+        document.getElementById('final-score').textContent = `${percentage}%`;
+        
+        const msg = document.getElementById('final-msg');
+        if (percentage >= 85) {
+            msg.textContent = "أداء ممتاز! ملم بجوانب الفكر الجغرافي بشكل رائع.";
+            triggerBigConfetti();
+        } else if (percentage >= 50) msg.textContent = "أداء جيد، ويمكنك زيادة التحصيل بالمراجعة.";
+        else msg.textContent = "حاول مرة أخرى وركز في تعريفات المفكرين والمفاهيم الجغرافية.";
+    }
+
+    function triggerBigConfetti() {
+        var duration = 3 * 1000;
+        var end = Date.now() + duration;
+        (function frame() {
+            confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+            confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+            if (Date.now() < end) requestAnimationFrame(frame);
+        }());
+    }
+
+    function showFeedback() {
+        resultScreen.style.display = 'none';
+        feedbackScreen.style.display = 'block';
+        const fbContainer = document.getElementById('feedback-container');
+        fbContainer.innerHTML = '';
+
+        userAnswers.forEach((ans, idx) => {
+            const qData = questions[ans.qIndex];
+            const item = document.createElement('div');
+            item.className = `feedback-item ${ans.isCorrect ? 'correct-item' : 'wrong-item'}`;
+
+            const userChoiceText = ans.selected !== null ? qData.options[ans.selected] : "لم يتم الإجابة (انتهى الوقت)";
+            const correctChoiceText = qData.options[ans.correct];
+
+            item.innerHTML = `
+                <div class="badge-status ${ans.isCorrect ? 'badge-correct' : 'badge-wrong'}">
+                    ${ans.isCorrect ? '✓ إجابة صحيحة' : '✗ إجابة خاطئة'}
+                </div>
+                <div class="fb-q">السؤال ${idx + 1}: ${qData.q}</div>
+                <div class="fb-ans">إجابتك: <span style="color: ${ans.isCorrect ? 'var(--success)' : 'var(--error)'};">${userChoiceText}</span></div>
+                ${!ans.isCorrect ? `<div class="fb-ans">الإجابة الصحيحة: <span style="color: var(--success);">${correctChoiceText}</span></div>` : ''}
+                <div class="fb-exp">💡 <b>التفسير والتعليل:</b> ${qData.explanation}</div>
+            `;
+            fbContainer.appendChild(item);
+        });
+    }
+
+    function generateCertificate() {
+        const name = document.getElementById('student-name').value;
+        if (!name) { alert("الرجاء كتابة الاسم أولاً"); return; }
+        
+        const percentage = Math.round((score / questions.length) * 100);
+        let grade = "مقبول";
+        if (percentage >= 90) grade = "ممتاز";
+        else if (percentage >= 80) grade = "جيد جداً";
+        else if (percentage >= 65) grade = "جيد";
+
+        document.getElementById('cert-name').textContent = name;
+        document.getElementById('cert-grade').textContent = grade + ` (${percentage}%)`;
+        document.getElementById('cert-date').textContent = new Date().toLocaleDateString('ar-EG');
+
+        resultScreen.style.display = 'none';
+        feedbackScreen.style.display = 'none';
+        certScreen.style.display = 'block';
+    }
+
+    function downloadImage() {
+        const certElement = document.getElementById('cert-node');
+        html2canvas(certElement, { scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'شهادة-مراجعة-الفكر-الجغرافية.png';
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    }
+
+    startQuiz();
+</script>
+
+</body>
+</html>
